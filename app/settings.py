@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 from pathlib import Path
 import os
 from dotenv import load_dotenv
+import datetime
 
 
 load_dotenv()
@@ -114,6 +115,8 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
+
+
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
@@ -135,3 +138,47 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Modo de Autenticação
+AUTH_USER_MODEL = 'core.User'
+
+# Tornar não obrigatório colocar barra no final das rotas
+APPEND_SLASH=False
+
+
+REST_FRAMEWORK = {
+    # Biblioteca de documentação
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    # Por padrão, todas rotas devem ter autenticação 
+    'DEFAULT_PERMISSION_CLASSES': (
+        #'rest_framework.permissions.IsAuthenticated',
+    ),
+    # Como é possível se autenticar
+    'DEFAULT_AUTHENTICATION_CLASSES':(
+        # Autenticação base de sessões
+        'rest_framework.authentication.SessionAuthentication',
+        # Autenticação básica
+        'rest_framework.authentication.BasicAuthentication',
+        # Autenticação JWT
+        'rest_framework._simplejwt.authentication.JWTAuthentication',
+    ),
+}
+
+"""
+Simple JWT fornece um backend de autenticação JSON Web Token para o Django REST Framework.
+O objetivo é cobrir os casos de uso mais comuns de JWTs, oferecendo um conjunto conservador de recursos padrão
+"""
+SIMPLE_JWT = {
+    #especifica por quanto tempo os tokens de acesso são válidos
+    'ACCESS_TOKEN_LIFETIME': datetime.timedelta(minutes=60),
+    #objeto que especifica por quanto tempo os tokens de atualização são válidos, revalidar
+    'REFRESH_TOKEN_LIFETIME': datetime.timedelta(days=30),
+    # Forma para obter
+    "TOKEN_OBTAIN_SERIALIZER": "rest_framework_simplejwt.serializers.TokenObtainPairSerializer",
+
+}
+
+
+SPECTACULAR_SETTINGS = {
+        'COMPONENT_SPLIT_REQUEST': True
+}
