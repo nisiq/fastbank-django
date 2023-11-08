@@ -2,7 +2,7 @@
 File admin django
 """
 
-from django.contrib import admin 
+from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.utils.translation import gettext_lazy as _
 
@@ -16,8 +16,8 @@ class UserAdmin(BaseUserAdmin):
     list_display = ['id', 'first_name', 'last_name', 'cpf']
     fieldsets = (
         # Paginas de Usuario
-        (None, {'fields': ('email', 'password,')})
-        (__('Personal info'), {'fields': ('first_name', 'last_name', 'cpf',)}),
+        (None, {'fields': ('email', 'password',)}),
+        (_('Personal info'), {'fields': ('first_name', 'last_name', 'cpf',)}),
         (
             ('Permissions'),
             {
@@ -39,16 +39,18 @@ class UserAdmin(BaseUserAdmin):
         (None, {
             'classes': ('wide',),
             'fields': (
+                'first_name',
+                'last_name',
+                'cpf',
                 'email',
                 'password1',
                 # verificação de senha
                 'password2',
-                'name',
                 'is_active',
                 'is_staff',
                 'is_superuser'
             )
-        })
+        }),
     )
 
 
