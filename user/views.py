@@ -19,5 +19,14 @@ class CreateUserView(generics.CreateAPIView):
     serializer_class = UserSerializer
 
 
-class ManagerUserAPiView(generics.RetrieveUpdateAPIView):
-    """ Manage for the authenicated """
+class ManagerUserAPiView(generics.RetrieveUpdateAPIView, generics.CreateAPIView):
+    """ Manage for the users"""
+    serializer_class = UserSerializer
+    # Forma de Autenticação
+    authentication_classes = [authenticationJWT.JWTAuthentication]
+    permission_classes = [IsCreationOrIsAuthenticated]
+
+
+    def get_object(self):
+        """ Retrieve and return a user """
+        return self.request.user
