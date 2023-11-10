@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'drf_spectacular',
     'core',
     'user',
     'api'
@@ -160,7 +161,7 @@ REST_FRAMEWORK = {
         # Autenticação básica
         'rest_framework.authentication.BasicAuthentication',
         # Autenticação JWT
-        'rest_framework._simplejwt.authentication.JWTAuthentication',
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
 }
 

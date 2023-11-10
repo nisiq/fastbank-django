@@ -26,10 +26,10 @@ class UserSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             # Configs campos
             # Apenas escrever, não visualizar
-            'password': {'write_only': True, 'min_lenght': 6},
+            'password': {'write_only': True, 'min_length': 6},
             # Podemos apenas ler, não modificar
-            'is_active': {'read_only': True} 
-            'created_at': {'read_only': True}
+            'is_active': {'read_only': True},
+            'created_at': {'read_only': True},
         }
 
         def create(self, validated_data):
