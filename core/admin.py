@@ -17,7 +17,7 @@ class UserAdmin(BaseUserAdmin):
     fieldsets = (
         # Paginas de Usuario
         (None, {'fields': ('email', 'password',)}),
-        (_('Personal info'), {'fields': ('first_name', 'last_name', 'cpf',)}),
+        (_('Personal info'), {'fields': ('first_name', 'last_name', 'cpf', 'url_imagem',)}),
         (
             ('Permissions'),
             {
@@ -43,6 +43,7 @@ class UserAdmin(BaseUserAdmin):
                 'last_name',
                 'cpf',
                 'email',
+                'url_imagem',
                 'password1',
                 # verificação de senha
                 'password2',

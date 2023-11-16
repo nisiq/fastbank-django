@@ -22,7 +22,7 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = get_user_model()
         # Campos que vamos enviar/receber
-        fields = ['email', 'password', 'first_name', 'last_name', 'cpf', 'created_at']
+        fields = ['email', 'password', 'first_name', 'last_name', 'cpf', 'created_at', 'url_imagem']
         extra_kwargs = {
             # Configs campos
             # Apenas escrever, não visualizar
