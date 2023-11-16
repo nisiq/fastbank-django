@@ -15,13 +15,15 @@ from django.utils import timezone
 class UserManager(BaseUserManager):
     """ Manager for users """
 
-    def create_user(self, email, password=None, **extra_fiels):
+    def create_user(self, email, password=None, **extra_fields):
         """ Create, save and return a new user """
         if not email:
             raise ValueError("Usuario deve inserir o email")
 
-        user = self.model(email=self.normalize_email(email), **extra_fiels)
+        user = self.model(email=self.normalize_email(email), **extra_fields)
+        print(user.password)
         user.set_password(password)
+        print(user.password)
     #Salvar Usuario
         user.save()
 
