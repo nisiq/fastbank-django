@@ -12,6 +12,7 @@ from django.contrib.auth.models import (
 )
 
 from django.utils import timezone
+from django.conf import settings
 
 # Imagens
 def user_image_field(instance, filename):
@@ -21,6 +22,16 @@ def user_image_field(instance, filename):
     filename = f'{uuid.uuid4()}{ext}'
 
     return os.path.join('uploads', 'user', filename)
+
+class Conta(models.Model):
+    """ Conta para cada um dos clientes (usuarios)"""
+    agencia = models.CharField(max_length=4, unique=True)
+    numero = models.CharField(max_length=8)
+    saldo = models.DecimalField(max_digits=5, decimal_places=2)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.DO_NOTHING
+    )
 
 
 class UserManager(BaseUserManager):
