@@ -17,6 +17,7 @@ from django.conf import settings
 
 urlpatterns = [
     path('api/v1/user/', include('user.urls')), #Incluir todas as rotas de user.urls
+    path('api/v1/', include('api.urls')), #Incluir todas as rotas de user.urls
     path('admin/', admin.site.urls),
 
     # Rotas de Autenticação

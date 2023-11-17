@@ -32,18 +32,19 @@ class UserSerializer(serializers.ModelSerializer):
             'created_at': {'read_only': True},
         }
         
+
     def create(self, validated_data):
         """ Create and Return a new user with encrypted password """
         # core.models - user manager
-        return  get_user_model().objects.create_user(**validated_data)
+        return get_user_model().objects.create_user(**validated_data)
 
-    def update(self, instance, validated_data):
+
+    def update(self, instance, validated_data):     
         """ Update and Return a user """
         password = validated_data.pop('password', None)
         user = super().update(instance, validated_data)
         
         if password:
-
             user.set_password(password)
             user.save()
 
