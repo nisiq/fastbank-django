@@ -24,6 +24,7 @@ class AccountViewSet(viewsets.ModelViewSet):
         ).order_by('-created_at').distinct() #distinct evita duplicacao
     #"SELECT * FROM contas where user_id = 1"
 
+
     def get_serializer_class(self):
         if self.action == 'retrieve':
             return serializers.AccountDetailSerializer
