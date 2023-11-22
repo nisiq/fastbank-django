@@ -48,17 +48,20 @@ INSTALLED_APPS = [
     'drf_spectacular',
     'core',
     'user',
-    'api'
+    'api',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+   
 ]
 
 ROOT_URLCONF = 'app.urls'
@@ -92,7 +95,7 @@ DATABASES = {
         'USER': os.environ.get('DB_USER'),
         'PASSWORD': os.environ.get('DB_PASSWORD'),
         'NAME': os.environ.get('DB_NAME'),
-        'PORT': '3307',
+        'PORT': '3306',
     }
 }
 
@@ -152,6 +155,10 @@ AUTH_USER_MODEL = 'core.User'
 
 # Tornar não obrigatório colocar barra no final das rotas
 APPEND_SLASH=False
+
+
+CORS_ALLOW_ALL_ORIGINS = True #Permite qualquer dominio acessar api
+
 
 
 REST_FRAMEWORK = {

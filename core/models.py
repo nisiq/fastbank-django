@@ -85,7 +85,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     objects = UserManager()
 
     # Para fazer login, campos utilizados
-    USERNAME_FIELD = 'email'
+    USERNAME_FIELD = 'cpf'
 
     def __str__(self) -> str:
         return f'self.{self.first_name} {self.last_name}'
