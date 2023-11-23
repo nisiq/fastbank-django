@@ -75,7 +75,7 @@ class AccountViewSet(viewsets.ModelViewSet):
             saldo = decimal.Decimal(conta.saldo)
 
             comparacao = saldo.compare(valor_saque)
-            # O valor que quero sacar tem o mesmo valor de saldo, ou menos que o saldo
+            
             if comparacao == 0 or comparacao == 1:
                 print(saldo - valor_saque)
                 #se o que descontar for menor ou igual a 0 = desconto - 0, 
@@ -111,4 +111,37 @@ class AccountViewSet(viewsets.ModelViewSet):
         return Response(serializer_recebido.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+
+    # TRANSFERENCIA
+    @action(methods=['POST'], detail=True, url_path='transferir')
+    def transferir(self, request, pk=None):
+        
+        conta_origem = Conta.objects.filter(id=pk).first()
+
+        if conta_origem:
+            serializer = serializers.TransferenciaSerializer(data=request.data)
+
+            if serializer.is_valid():
+                # Obtém a conta de destino e o valor da transferência
+                conta_destino = serializer.validated_data.get('conta_destino')
+                valor_transferencia = decimal.Decimal(serializer.validated_data.get('valor'))
+
+                # saldo suficiente para a transferência?
+                if conta_origem.saldo >= valor_transferencia:
+                    conta_origem.saldo -= valor_transferencia
+                    conta_origem.save()
+
+                    # Adiciona o valor no saldo
+                    conta_destino.saldo += valor_transferencia
+                    conta_destino.save()
+
+                    return Response({"saldo_origem": conta_origem.saldo, "saldo_destino": conta_destino.saldo},
+                                    status=status.HTTP_200_OK)
+                else:
+                    return Response({"detail": "Saldo insuficiente para a transferência"},
+                                    status=status.HTTP_400_BAD_REQUEST)
+
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response({"detail": "Conta de origem não encontrada"}, status=status.HTTP_404_NOT_FOUND)
 

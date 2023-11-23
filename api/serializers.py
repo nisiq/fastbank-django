@@ -27,3 +27,12 @@ class SaqueSerializer(serializers.Serializer):
 
     class Meta:
         fields = ['value']
+
+
+class TransferenciaSerializer(serializers.Serializer):
+    conta_origem = serializers.PrimaryKeyRelatedField(queryset=Conta.objects.all())
+    conta_destino = serializers.PrimaryKeyRelatedField(queryset=Conta.objects.all())
+    valor = serializers.DecimalField(max_digits=10, decimal_places=2)
+
+    class Meta:
+        fields = ['conta_origem', 'conta_destino', 'valor']

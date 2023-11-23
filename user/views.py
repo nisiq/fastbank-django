@@ -31,6 +31,7 @@ class ManagerUserAPiView(generics.RetrieveUpdateAPIView, generics.CreateAPIView)
         """ Retrieve and return a user """
         return self.request.user
     
+    
     @action(methods=['POST'], detail=True, url_path='upload-image')
     def upload_image(self, request, pk=None):
         """ Upload an image to user """
