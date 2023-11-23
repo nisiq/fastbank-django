@@ -4,7 +4,7 @@ from core.models import Conta
 class AccountSerializer(serializers.ModelSerializer):
     class Meta:
         model = Conta
-        fields = ['agencia', 'numero']
+        fields = ['id', 'agencia', 'numero']
         read_only_fields = ['numero'] #Apenas leitura
 
 

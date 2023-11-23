@@ -55,13 +55,17 @@ class AccountViewSet(viewsets.ModelViewSet):
             conta.save()
 
             return Response({'message':'Created'}, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
         
+
+
     #REALIZAR SAQUE
     @action(methods=['POST'], detail=True, url_path='sacar')
     def sacar(self, request, pk=None):
         conta = Conta.objects.filter(id=pk).first() # Pegar a primeira conta que encontrar
 
-        serializer_recebido = serializers.SaqueSerializer(request=request.data)
+        serializer_recebido = serializers.SaqueSerializer(data=request.data)
 
         # Se for valido e existir uma conta
         if serializer_recebido.is_valid() and conta:
@@ -92,7 +96,7 @@ class AccountViewSet(viewsets.ModelViewSet):
     @action(methods=['POST'], detail=True, url_path='depositar')
     def depositar(self, request, pk=None):
         conta = Conta.objects.filter(id=pk).first() # Pegar a primeira conta que encontrar
-        serializer_recebido = serializers.DepositoSerializer(request=request.data)
+        serializer_recebido = serializers.DepositoSerializer(data=request.data)
 
         if serializer_recebido.is_valid() and conta:
             # Pegar valor do deposito
