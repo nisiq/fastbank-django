@@ -9,9 +9,11 @@ Serializers for thhe user API View
 """
 
 from django.contrib.auth import get_user_model, authenticate
+from core.models import Conta
 
 from rest_framework import serializers
-
+import random
+import decimal
 from django.utils.translation import gettext as _ 
 
 
@@ -34,9 +36,28 @@ class UserSerializer(serializers.ModelSerializer):
         
 
     def create(self, validated_data):
-        """ Create and Return a new user with encrypted password """
-        # core.models - user manager
-        return get_user_model().objects.create_user(**validated_data)
+        """Cria e retorna um novo usuário com uma conta associada."""
+        password = validated_data.pop('password', None)
+        user = get_user_model().objects.create_user(**validated_data)
+
+        if password:
+            user.set_password(password)
+            user.save()
+
+        # Cria uma conta associada
+        agencia = '0001'
+        numero = ''.join(str(random.randint(0, 9)) for _ in range(8))
+
+        conta = Conta(
+            user=user,
+            numero=numero,
+            agencia=agencia,
+            saldo=decimal.Decimal(0)
+        )
+
+        conta.save()
+
+        return user
 
 
     def update(self, instance, validated_data):     
