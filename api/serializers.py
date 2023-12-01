@@ -1,7 +1,7 @@
 import datetime
 import random
 from rest_framework import serializers
-from core.models import Conta, CartaoCredito
+from core.models import Conta, CartaoCredito, HistoricoCartaoCredito
 from datetime import datetime, timedelta
 
 
@@ -45,21 +45,22 @@ class TransferenciaSerializer(serializers.Serializer):
 
 
 class CreditCardSerializer(serializers.Serializer):
-    # campo para a solicitação do cartão de crédito
+    # solicitação do cartão de crédito
     salario = serializers.DecimalField(max_digits=10, decimal_places=2)
 
     def create_credit_card_data(self, validated_data):
         """
         Método para criar os dados do cartão de crédito
         """
-        # tudo aleatorio
+        # validacao cartao de credito
+        if validated_data.get('salario') < 1200.00:
+            raise serializers.ValidationError("Não foi possível criar o cartão de crédito devido ao seu status financeiro.")
+
+        # aleatorio
         numero_cartao = ''.join([str(random.randint(0, 9)) for _ in range(13)])
         cvv = ''.join([str(random.randint(0, 9)) for _ in range(3)])
-        
         data_vencimento = (datetime.now() + timedelta(days=3650)).strftime('%Y-%m-%d')
-
-        # lgc para aprovar ou negar
-        limite_disponivel = 1000.00 if validated_data.get('salario') > 1200.00 else 0.00
+        limite_disponivel = 1000.00
 
         credit_card_data = {
             'numero_cartao': numero_cartao,
@@ -69,18 +70,46 @@ class CreditCardSerializer(serializers.Serializer):
             'salario': validated_data.get('salario'),
         }
 
-        # instância do modelo CartaoCredito com os dados gerados
+        # instância CartaoCredito com os dados gerados
         credit_card = CartaoCredito.objects.create(**credit_card_data)
 
         return credit_card
 
     def validate(self, data):
         """
-         garantir que o salário seja fornecido
+        Exigir o salario do usuario
         """
         if not data.get('salario'):
             raise serializers.ValidationError("Salário é obrigatório para solicitar um cartão de crédito.")
 
         return data
+    
+
+class EmprestimoSerializer(serializers.Serializer):
+    valor = serializers.DecimalField(max_digits=10, decimal_places=2)
+    num_parcelas = serializers.IntegerField()
+
+    class Meta:
+        fields = ['valor', 'num_parcelas']
+
+
+class TransacaoCartaoSerializer(serializers.Serializer):
+    valor = serializers.DecimalField(max_digits=10, decimal_places=2)
+    local = serializers.CharField(max_length=255)  # Adicione esta linha
+
+    class Meta:
+        fields = ['valor']
+
+
+class HistoricoCartaoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = HistoricoCartaoCredito
+        fields = ['valor', 'local', 'data_transacao']
+
+
+
+
+
+
 
 

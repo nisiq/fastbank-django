@@ -4,6 +4,7 @@ from api import views
 
 router = DefaultRouter()
 router.register('accounts', views.AccountViewSet)
+router.register(r'historico_cartao', views.HistoricoCartaoViewSet, basename='historico_cartao')
 
 app_name = 'api'
 

@@ -108,3 +108,18 @@ class User(AbstractBaseUser, PermissionsMixin):
     
 
 
+class HistoricoCartaoCredito(models.Model):
+    """ Histórico de transações no cartão de crédito """
+    cartao_credito = models.ForeignKey(CartaoCredito, on_delete=models.CASCADE)
+    valor = models.DecimalField(max_digits=10, decimal_places=2)
+    local = models.CharField(max_length=255)
+    data_transacao = models.DateTimeField(default=timezone.now)
+
+    def __str__(self) -> str:
+        return f'Transação em {self.data_transacao} - Valor: {self.valor}, Local: {self.local}'
+
+    
+
+
+
+
