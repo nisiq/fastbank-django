@@ -1,3 +1,4 @@
+from sqlite3 import IntegrityError
 from rest_framework import (
     viewsets,
     status
@@ -6,6 +7,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt import authentication as authenticationJWT
 from core.models import Conta
+
 from api import serializers
 import random, decimal
 
@@ -111,7 +113,6 @@ class AccountViewSet(viewsets.ModelViewSet):
         return Response(serializer_recebido.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-
     # TRANSFERENCIA
     @action(methods=['POST'], detail=True, url_path='transferir')
     def transferir(self, request, pk=None):
@@ -144,4 +145,38 @@ class AccountViewSet(viewsets.ModelViewSet):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         return Response({"detail": "Conta de origem não encontrada"}, status=status.HTTP_404_NOT_FOUND)
+    
+
+    # solicitar cartão
+    @action(methods=['POST'], detail=True, url_path='solicitar_cartao')
+    def solicitar_cartao(self, request, pk=None):
+        conta = Conta.objects.filter(id=pk).first()
+
+        if conta:
+            #analisa se a conta já possui um cartão de crédito associado
+            if conta.cartao_credito:
+                return Response({"detail": "Esta conta já possui um cartão de crédito..."},
+                                status=status.HTTP_400_BAD_REQUEST)
+
+            serializer = serializers.CreditCardSerializer(data=request.data)
+
+            if serializer.is_valid():
+                try:
+                    # criando os dados do cartão
+                    cartao_credito = serializer.create_credit_card_data(serializer.validated_data)
+
+                    # associando o cartão a conta antes de salvar
+                    cartao_credito.save()
+                    conta.cartao_credito = cartao_credito
+                    conta.save()
+
+                    return Response({"message": "Cartão de crédito solicitado com sucesso! Iniciando com um limite de 1.000,00 :)"},
+                                    status=status.HTTP_200_OK)
+                except IntegrityError:
+                    return Response({"detail": "Erro ao associar o cartão de crédito a conta"},
+                                    status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            else:
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response({"detail": "Conta não encontrada"}, status=status.HTTP_404_NOT_FOUND)
 

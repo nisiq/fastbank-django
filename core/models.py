@@ -14,6 +14,7 @@ from django.contrib.auth.models import (
 from django.utils import timezone
 from django.conf import settings
 
+
 # Imagens
 def user_image_field(instance, filename):
     """Generate file path for new image"""
@@ -22,6 +23,19 @@ def user_image_field(instance, filename):
     filename = f'{uuid.uuid4()}{ext}'
 
     return os.path.join('uploads', 'user', filename)
+
+
+class CartaoCredito(models.Model):
+    """ Dados do Cartao de Credito """
+    numero_cartao = models.CharField(max_length=13)
+    cvv = models.CharField(max_length=3)
+    data_vencimento = models.DateField()
+    limite_disponivel = models.DecimalField(max_digits=6, decimal_places=2)
+    salario = models.DecimalField(max_digits=10, decimal_places=2)
+
+    def __str__(self) -> str:
+        return f'Cartao {self.numero_cartao} - Limite: {self.limite_disponivel}'
+
 
 class Conta(models.Model):
     """ Conta para cada um dos clientes (usuarios)"""
@@ -32,6 +46,8 @@ class Conta(models.Model):
         settings.AUTH_USER_MODEL,
         on_delete=models.DO_NOTHING
     )
+     # Adicionando o campo de relacionamento com CartaoCredito
+    cartao_credito = models.OneToOneField(CartaoCredito, on_delete=models.CASCADE, null=True, blank=True)
     created_at = models.DateTimeField(default=timezone.now)
 
     def __str__(self) -> str:
@@ -89,3 +105,6 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self) -> str:
         return f'self.{self.first_name} {self.last_name}'
+    
+
+
