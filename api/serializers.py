@@ -1,7 +1,7 @@
 import datetime
 import random
 from rest_framework import serializers
-from core.models import Conta, CartaoCredito, HistoricoCartaoCredito
+from core.models import Conta, CartaoCredito, HistoricoCartaoCredito, HistoricoSaldo
 from datetime import datetime, timedelta
 
 
@@ -108,8 +108,7 @@ class HistoricoCartaoSerializer(serializers.ModelSerializer):
 
 
 
-
-
-
-
-
+class HistoricoSaldoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = HistoricoSaldo
+        fields = ['tipo', 'valor', 'data_transacao']

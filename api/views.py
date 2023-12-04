@@ -6,7 +6,7 @@ from rest_framework import (
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt import authentication as authenticationJWT
-from core.models import CartaoCredito, Conta, HistoricoCartaoCredito
+from core.models import CartaoCredito, Conta, HistoricoCartaoCredito, HistoricoSaldo
 
 from api import serializers
 import random, decimal
@@ -36,7 +36,6 @@ class AccountViewSet(viewsets.ModelViewSet):
         return serializers.AccountSerializer
     
 
-    
     def create(self, request, *args, **kwargs):
         serializer = serializers.AccountSerializer(data=request.data)
         if serializer.is_valid():
@@ -59,8 +58,14 @@ class AccountViewSet(viewsets.ModelViewSet):
             return Response({'message':'Created'}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        
+    
+    def registrar_transacao(self, tipo, valor):
+        conta = self.get_object()
+        conta.registrar_transacao(tipo, valor)
 
+
+    
+    
 
     #REALIZAR SAQUE
     @action(methods=['POST'], detail=True, url_path='sacar')
@@ -87,6 +92,7 @@ class AccountViewSet(viewsets.ModelViewSet):
                 conta.saldo = novo_valor
                 conta.save()
 
+                self.registrar_transacao(HistoricoSaldo.TIPO_SAQUE, valor_saque)
                 return Response({"saldo": conta.saldo}, status=status.HTTP_200_OK)
             
             return Response({'message': 'Saldo Insuficiente'}, status=status.HTTP_403_FORBIDDEN)
@@ -108,6 +114,8 @@ class AccountViewSet(viewsets.ModelViewSet):
 
             conta.saldo = saldo + valor_deposito
             conta.save()
+
+            self.registrar_transacao(HistoricoSaldo.TIPO_DEPOSITO, valor_deposito)
             return Response({"saldo": conta.saldo}, status=status.HTTP_200_OK)
 
         return Response(serializer_recebido.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -136,8 +144,11 @@ class AccountViewSet(viewsets.ModelViewSet):
                     conta_destino.saldo += valor_transferencia
                     conta_destino.save()
 
+
+                    self.registrar_transacao(HistoricoSaldo.TIPO_TRANSFERENCIA, valor_transferencia)
+                    conta_destino.registrar_transacao(HistoricoSaldo.TIPO_TRANSFERENCIA, valor_transferencia)
                     return Response({"saldo_origem": conta_origem.saldo, "saldo_destino": conta_destino.saldo},
-                                    status=status.HTTP_200_OK)
+                            status=status.HTTP_200_OK)
                 else:
                     return Response({"detail": "Saldo insuficiente para a transferência"},
                                     status=status.HTTP_400_BAD_REQUEST)
@@ -218,14 +229,15 @@ class AccountViewSet(viewsets.ModelViewSet):
                     
                     conta.saldo += valor_base
                     conta.save()
-
                 
+                    self.registrar_transacao(HistoricoSaldo.TIPO_EMPRESTIMO, valor_base)
                     return Response({
-                        "message": "Empréstimo aprovado!",
-                        "quantidade de parcelas": num_parcelas,
-                        "juros": valor_juros,
-                        "valor total a pagar": (valor_emprestimo + valor_juros)
-                    }, status=status.HTTP_200_OK)
+                    "message": "Empréstimo aprovado!",
+                    "quantidade de parcelas": num_parcelas,
+                    "juros": valor_juros,
+                    "valor total a pagar": (valor_emprestimo + valor_juros)
+                }, status=status.HTTP_200_OK)
+
                 else:
                     return Response({"detail": "Status Financeiro insuficiente para o empréstimo. Você deve ter pelo menos 10% do valor solicitado."},
                                     status=status.HTTP_400_BAD_REQUEST)
@@ -260,11 +272,12 @@ class AccountViewSet(viewsets.ModelViewSet):
                         local=local_transacao
                     )
 
+                    conta.registrar_transacao(HistoricoSaldo.TIPO_TRANSFERENCIA, -valor_transacao)
                     return Response({
-                        "message": "Transação realizada com sucesso!",
-                        "limite_disponivel": conta.cartao_credito.limite_disponivel,
-                        "destinatario": local_transacao
-                    }, status=status.HTTP_200_OK)
+                    "message": "Transação realizada com sucesso!",
+                    "limite_disponivel": conta.cartao_credito.limite_disponivel,
+                    "destinatario": local_transacao
+                }, status=status.HTTP_200_OK)
                 else:
                     return Response({"detail": "Limite do cartão insuficiente para a transação"},
                                     status=status.HTTP_400_BAD_REQUEST)
@@ -274,7 +287,7 @@ class AccountViewSet(viewsets.ModelViewSet):
         return Response({"detail": "Conta ou cartão de crédito não encontrados"},
                         status=status.HTTP_404_NOT_FOUND)
     
-
+    
 
 class HistoricoCartaoViewSet(viewsets.ReadOnlyModelViewSet):
     """ Exibe o histórico de transações no cartão de crédito """

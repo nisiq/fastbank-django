@@ -50,6 +50,13 @@ class Conta(models.Model):
     cartao_credito = models.OneToOneField(CartaoCredito, on_delete=models.CASCADE, null=True, blank=True)
     created_at = models.DateTimeField(default=timezone.now)
 
+    def registrar_transacao(self, tipo, valor):
+        HistoricoSaldo.objects.create(
+            tipo=tipo,
+            valor=valor,
+            conta=self
+        )
+
     def __str__(self) -> str:
         return f'self.{self.agencia} - {self.numero}'
 
@@ -96,6 +103,10 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_staff = models.BooleanField(default=False)
     # Quando foi criado
     created_at = models.DateTimeField(default=timezone.now)
+    login_attempts = models.PositiveIntegerField(default=0)
+    locked_at = models.DateTimeField(null=True, blank=True)
+    unlocked_at = models.DateTimeField(null=True, blank=True)
+
 
     # Objetos disso serão gerenciados pelo UserManager
     objects = UserManager()
@@ -117,9 +128,25 @@ class HistoricoCartaoCredito(models.Model):
 
     def __str__(self) -> str:
         return f'Transação em {self.data_transacao} - Valor: {self.valor}, Local: {self.local}'
-
     
 
+class HistoricoSaldo(models.Model):
+    TIPO_SAQUE = 'saque'
+    TIPO_DEPOSITO = 'deposito'
+    TIPO_TRANSFERENCIA = 'transferencia'
+    TIPO_EMPRESTIMO = 'emprestimo'
 
+    TIPO_CHOICES = [
+        (TIPO_SAQUE, 'Saque'),
+        (TIPO_DEPOSITO, 'Depósito'),
+        (TIPO_TRANSFERENCIA, 'Transferência'),
+        (TIPO_EMPRESTIMO, 'Empréstimo'),
+    ]
 
+    tipo = models.CharField(max_length=20, choices=TIPO_CHOICES)
+    valor = models.DecimalField(max_digits=10, decimal_places=2)
+    data_transacao = models.DateTimeField(default=timezone.now)
+    conta = models.ForeignKey('Conta', on_delete=models.CASCADE)
 
+    def __str__(self):
+        return f'{self.tipo} - Valor: {self.valor} - Data: {self.data_transacao}'
