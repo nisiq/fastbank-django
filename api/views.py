@@ -287,6 +287,20 @@ class AccountViewSet(viewsets.ModelViewSet):
         return Response({"detail": "Conta ou cartão de crédito não encontrados"},
                         status=status.HTTP_404_NOT_FOUND)
     
+    @action(detail=True, methods=['GET'], url_path='historico-transacoes')
+    def historico_transacoes(self, request, pk=None):
+        # Obtenha a conta associada ao usuário autenticado
+        conta = Conta.objects.filter(id=pk, user=request.user).first()
+
+        if conta:
+            # Obtenha o histórico de transações da conta
+            transacoes = HistoricoSaldo.objects.filter(conta=conta).order_by('-data_transacao')
+
+            # Serialização e retorno da resposta
+            serializer = serializers.HistoricoSaldoSerializer(transacoes, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response({"detail": "Conta não encontrada"}, status=status.HTTP_404_NOT_FOUND)
     
 
 class HistoricoCartaoViewSet(viewsets.ReadOnlyModelViewSet):
@@ -301,3 +315,13 @@ class HistoricoCartaoViewSet(viewsets.ReadOnlyModelViewSet):
             return HistoricoCartaoCredito.objects.filter(cartao_credito=cartao_credito).order_by('-data_transacao')
         return HistoricoCartaoCredito.objects.none()
 
+
+class HistoricoSaldoViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = HistoricoSaldo.objects.all()
+    serializer_class = serializers.HistoricoSaldoSerializer
+    authentication_classes = [authenticationJWT.JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        # filtrar as transações por conta do usuário autenticado
+        return HistoricoSaldo.objects.filter(conta__user=self.request.user).order_by('-data_transacao')
