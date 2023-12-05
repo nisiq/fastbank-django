@@ -78,7 +78,7 @@ class AccountViewSet(viewsets.ModelViewSet):
         if serializer_recebido.is_valid() and conta:
                                         #pegar o valor           #pegar o dado validado 
             valor_saque = decimal.Decimal(serializer_recebido.validated_data.get('value')) #value em serializert
-            # Pegar o saldo da pessoa
+         
             saldo = decimal.Decimal(conta.saldo)
 
             comparacao = saldo.compare(valor_saque)
@@ -107,9 +107,9 @@ class AccountViewSet(viewsets.ModelViewSet):
         serializer_recebido = serializers.DepositoSerializer(data=request.data)
 
         if serializer_recebido.is_valid() and conta:
-            # Pegar valor do deposito
+   
             valor_deposito = decimal.Decimal(serializer_recebido.validated_data.get('value'))
-            # Saldo da pessoa
+           
             saldo = decimal.Decimal(conta.saldo)
 
             conta.saldo = saldo + valor_deposito
@@ -131,7 +131,7 @@ class AccountViewSet(viewsets.ModelViewSet):
             serializer = serializers.TransferenciaSerializer(data=request.data)
 
             if serializer.is_valid():
-                # Obtém a conta de destino e o valor da transferência
+                # conta de destino e o valor da transferência
                 conta_destino = serializer.validated_data.get('conta_destino')
                 valor_transferencia = decimal.Decimal(serializer.validated_data.get('valor'))
 
@@ -193,8 +193,7 @@ class AccountViewSet(viewsets.ModelViewSet):
     
 
     def calcular_valor_total_com_juros(self, valor_emprestimo, num_parcelas):
-        # Aqui você pode adicionar qualquer lógica necessária para calcular o valor total com base nas parcelas e no valor do empréstimo
-        # Vamos simplificar e assumir que o valor total é o valor do empréstimo por enquanto
+
         return valor_emprestimo, self.calcular_juros(valor_emprestimo, num_parcelas)
 
     def calcular_juros(self, valor_emprestimo, num_parcelas):
@@ -289,14 +288,14 @@ class AccountViewSet(viewsets.ModelViewSet):
     
     @action(detail=True, methods=['GET'], url_path='historico-transacoes')
     def historico_transacoes(self, request, pk=None):
-        # Obtenha a conta associada ao usuário autenticado
+
         conta = Conta.objects.filter(id=pk, user=request.user).first()
 
         if conta:
-            # Obtenha o histórico de transações da conta
+          
             transacoes = HistoricoSaldo.objects.filter(conta=conta).order_by('-data_transacao')
 
-            # Serialização e retorno da resposta
+
             serializer = serializers.HistoricoSaldoSerializer(transacoes, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:
